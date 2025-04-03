@@ -36,4 +36,21 @@ function Gem:draw()
     self.animation:draw(spriGem, self.x, self.y, 0, Gem.SCALE, Gem.SCALE)
 end
 
+-- This approach reminds me of things ive done in laguages like java so it's what im most comfortable with 
+function Gem:color()
+    if self.type == 4 then
+        return 1, 1, 0   
+    elseif self.type == 5 then
+        return 0.2, 0.6, 1   
+    elseif self.type == 6 then
+        return 0.7, 0.7, 0.7 
+    elseif self.type == 7 then
+        return 1, 0.2, 0.2  
+    elseif self.type == 8 then
+        return 0.2, 1, 0.3   
+    end
+    return 1, 1, 1 
+end
+
+
 return Gem

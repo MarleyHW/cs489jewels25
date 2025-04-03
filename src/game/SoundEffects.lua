@@ -8,6 +8,7 @@ sounds['levelUp'] = love.audio.newSource("sounds/Retro_Suc_Melody_01.wav","stati
 sounds['timeOut'] = love.audio.newSource("sounds/Retro_Neg_Melody_01.wav","static")
 sounds['coin'] = love.audio.newSource("sounds/Retro PickUp Coin 07.wav","static") -- for the exercise
 
+
 -- Config music options
 sounds['playStateMusic']:setLooping(true) -- game music is looped
 sounds['playStateMusic']:setVolume(0.3) -- volume 40%

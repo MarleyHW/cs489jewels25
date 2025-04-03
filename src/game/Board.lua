@@ -7,6 +7,8 @@ local Cursor = require "src.game.Cursor"
 local Explosion = require "src.game.Explosion"
 local Sounds = require "src.game.SoundEffects"
 
+
+
 local Board = Class{}
 Board.MAXROWS = 8
 Board.MAXCOLS = 8
@@ -16,6 +18,10 @@ function Board:init(x,y, stats)
     self.y = y
     self.stats = stats
     self.cursor = Cursor(self.x,self.y,Board.TILESIZE+1)
+    self.chainCount = 0
+    self.labelY = 0
+    self.labelTween = nil
+    self.chainLabel = nil
 
     self.tiles = Matrix:new(Board.MAXROWS,Board.MAXCOLS)
     for i=1, Board.MAXROWS do
@@ -71,6 +77,16 @@ function Board:fixInitialMatrix()
     end    
 end    
 
+function Board:showChainLabel()
+    if self.chainCount > 1 then
+        self.chainLabel = "Chain x" .. self.chainCount .. "!"
+        -- Through trial and error found a way to show the chain message
+        self.labelY = self.y + Board.TILESIZE * Board.MAXROWS + 30
+        self.labelTween = Tween.new(1, self, { labelY = self.y - 20 })
+    end
+end
+
+
 function Board:update(dt)
     for i=1, Board.MAXROWS do
         for j=1, Board.MAXCOLS do
@@ -98,6 +114,7 @@ function Board:update(dt)
     if #self.arrayFallTweens == 0 then
         self:matches()
     end
+
 
     if self.tweenGem1 ~= nil and self.tweenGem2~=nil then
         local completed1 = self.tweenGem1:update(dt)
@@ -128,6 +145,13 @@ function Board:draw()
     for k=1, #self.explosions do
         self.explosions[k]:draw()
     end
+    -- Cool animation
+    if self.chainLabel then
+        love.graphics.setColor(1, 1, 0)
+        love.graphics.printf(self.chainLabel, 0, self.labelY, gameWidth, "center")
+        love.graphics.setColor(1, 1, 1)
+    end
+    
 end
 
 function Board:cheatGem(x,y)
@@ -239,22 +263,26 @@ end
 function Board:matches()
     local horMatches = self:findHorizontalMatches()
     local verMatches = self:findVerticalMatches() 
+    self.chainCount = (#horMatches > 0 or #verMatches > 0) and (self.chainCount + 1) or 0
+    if self.chainCount == 0 then return end
+
     local score = 0
 
     if #horMatches > 0 or #verMatches > 0 then -- if there are matches
+        self:showChainLabel()
         for k, match in pairs(horMatches) do
             score = score + 2^match.size * 10   
             for j=0, match.size-1 do
-                self.tiles[match.row][match.col+j] = nil
                 self:createExplosion(match.row,match.col+j)
+                self.tiles[match.row][match.col+j] = nil
             end -- end for j 
         end -- end for each horMatch
 
         for k, match in pairs(verMatches) do
             score = score + 2^match.size * 10   
             for i=0, match.size-1 do
-                self.tiles[match.row+i][match.col] = nil
                 self:createExplosion(match.row+i,match.col)
+                self.tiles[match.row+i][match.col] = nil
             end -- end for i 
         end -- end for each verMatch
 
@@ -273,7 +301,7 @@ end
 function Board:createExplosion(row,col)
     local exp = Explosion()
     exp:trigger(self.x+(col-1)*Board.TILESIZE+Board.TILESIZE/2,
-               self.y+(row-1)*Board.TILESIZE+Board.TILESIZE/2)  
+               self.y+(row-1)*Board.TILESIZE+Board.TILESIZE/2, self.tiles[row][col] and {self.tiles[row][col]:color()} or {1, 1, 1})  
     table.insert(self.explosions, exp) -- add exp to our array
 end
 

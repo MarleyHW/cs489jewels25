@@ -1,3 +1,5 @@
+-- Authors: Marley Holt-Williams
+
 local Globals = require "src.Globals"
 local Push = require "libs.push"
 local Background = require "src.game.Background"
@@ -22,7 +24,8 @@ function love.load()
     gem1 = Gem(100,50,5)
     gem2 = Gem(500,50,6)
 
-    stats = Stats()
+    -- This stops error I was getting
+    stats = Stats(sounds)
     board = Board(140,80,stats)
     border = Border(110,50,380,380)
 
@@ -40,8 +43,10 @@ function love.keypressed(key)
         love.event.quit()
     elseif key == "F2" or key == "tab" then
         debugFlag = not debugFlag
-    elseif key == "return" and gameState=="start" then
-        gameState = "play"
+    elseif key == "return" and (gameState == "start" or gameState == "over") then
+        stats = Stats(sounds)                              
+        board = Board(140, 80, stats)               
+        gameState = "play"    
     end
 end
 
@@ -127,6 +132,8 @@ end
 function drawGameOverState()
     love.graphics.printf("GameOver",titleFont,0,50,
         gameWidth,"center")
-    love.graphics.printf("Press Enter to Play or Escape to exit",
+    love.graphics.printf("Press Enter to restart or Escape to end",
         0,90, gameWidth,"center")
+    love.graphics.printf("Score: " .. stats.totalScore, 0, 110, gameWidth, "center")
+    love.graphics.printf("Level: " .. stats.level, 0, 150, gameWidth, "center")
 end

@@ -16,15 +16,20 @@ function Explosion:init()
 end
 
 function Explosion:setColor(r,g,b) -- sets the particle color
+    self.color = {r, g, b}
     self.particleSystem:setColors(r,g,b,1,r,g,b,0)
 end
 
-function Explosion:trigger(x,y)
-    if x and y then -- if x & y not nil, set then now
+function Explosion:trigger(x, y, color)
+    if color then
+        self:setColor(unpack(color))
+    end
+    if x and y then
         self.particleSystem:setPosition(x, y)
     end
-    self.particleSystem:emit(30) -- Emit 30 particles
+    self.particleSystem:emit(30)
 end
+
 
 function Explosion:update(dt)
     self.particleSystem:update(dt)
